@@ -31,6 +31,7 @@ _log = logging.getLogger(__name__)
 # Calico installation config files
 INSTALLER_CONFIG_DIR = "/etc/calico/installer"
 NETMODULES_INSTALL_CONFIG = INSTALLER_CONFIG_DIR + "/netmodules"
+CNI_INSTALL_CONFIG = INSTALLER_CONFIG_DIR + "/cni"
 DOCKER_INSTALL_CONFIG = INSTALLER_CONFIG_DIR + "/docker"
 
 # Docker information for a standard Docker install.
@@ -43,6 +44,7 @@ AGENT_EXE_RE = re.compile(r"(.*/)?mesos-slave")
 AGENT_EXE_PARMS_RE = None
 AGENT_CONFIG = "/opt/mesosphere/etc/mesos-slave-common"
 AGENT_MODULES_CONFIG = "/opt/mesosphere/etc/mesos-slave-modules.json"
+
 
 # Docker version regex
 DOCKER_VERSION_RE = re.compile(r"Docker version (\d+)\.(\d+)\.(\d+).*")
@@ -357,7 +359,7 @@ def get_host_info():
     _log.info("Arch: %s", arch)
 
     # Get Mesos Version
-    raw_mesos_version, _ = run_command("mesos-slave", args=["--version"],
+    raw_mesos_version, _ = run_command("mesos-master", args=["--version"],
                                        paths=["/opt/mesosphere/bin"])
     mesos_version = raw_mesos_version.split(" ")[1] if raw_mesos_version else None
     _log.info("Mesos Version: %s" % mesos_version)
@@ -522,6 +524,98 @@ def cmd_install_netmodules(public_slave=False):
     return
 
 
+def cmd_install_cni(public_slave=False):
+    """
+    Install Calico's CNI plugin.  A successful completion of the task
+    indicates successful installation
+
+    :param public_slave: Flag indicating if this is a public slave.
+    """
+    # Load the current Calico install info for Docker, and the current Docker
+    # daemon configuration.
+    install_config = load_config(CNI_INSTALL_CONFIG)
+
+    # Before starting the install, check that we are able to locate the agent
+    # process - if not there is not much we can do here.
+    if not install_config:
+        _log.debug("Have not started installation yet")
+        # noinspection PyTypeChecker
+        agent_process = wait_for_process(AGENT_EXE_RE,
+                                         AGENT_EXE_PARMS_RE,
+                                         MAX_TIME_FOR_AGENT_RESTART,
+                                         fail_if_not_found=False)
+        if not agent_process:
+            _log.info("Cannot find agent process - do not update config")
+            return
+
+        mesos_version, _, _ = get_host_info()
+        if not mesos_version:
+            _log.error("Mesos version does not support CNI. Performing a no-op.")
+            return
+
+        install_config["agent-created"] = None
+        install_config["cni-bin-installed"] = None
+        install_config["cni-conf-installed"] = None
+        store_config(CNI_INSTALL_CONFIG, install_config)
+
+    if not install_config.get("cni-bin-installed"):
+        # Install CNI binary
+        move_file_if_missing("./calico",
+                             "/opt/mesosphere/active/cni/calico") # TODO: paramaterize from config?
+        install_config["cni-bin-installed"] = True
+        store_config(CNI_INSTALL_CONFIG, install_config)
+
+        # Install Calico-IPAM
+        # move_file_if_missing("./calico-ipam",
+        #                      "/opt/mesosphere/active/cni")
+
+    if not install_config.get("cni-conf-installed"):
+        # Write CNI configuration
+        cni_conf = {
+            "name": "calico",
+            "type": "calico",
+            "ipam": {
+                "type": "calico"
+            }
+        }
+        store_config("/opt/mesosphere/etc/dcos/network/cni/calico.cni", cni_conf)
+        install_config["cni-conf-installed"] = True
+        store_config(CNI_INSTALL_CONFIG, install_config)
+
+    # If we haven't stored the current agent creation time, then do so now.
+    # We use this to track when the agent has restarted with our new config.
+    if not install_config.get("agent-created"):
+        _log.debug("Store agent creation time")
+        # noinspection PyTypeChecker
+        agent_process = wait_for_process(AGENT_EXE_RE,
+                                         AGENT_EXE_PARMS_RE,
+                                         MAX_TIME_FOR_AGENT_RESTART)
+        install_config["agent-created"] = str(agent_process.create_time())
+        store_config(CNI_INSTALL_CONFIG, install_config)
+
+    # Check the agent process creation time to see if it has been restarted
+    # since the config was updated.
+    _log.debug("Restart agent if not using updated config")
+    # noinspection PyTypeChecker
+    agent_process = wait_for_process(AGENT_EXE_RE,
+                                     AGENT_EXE_PARMS_RE,
+                                     MAX_TIME_FOR_AGENT_RESTART,
+                                     PROCESS_STABILITY_TIME)
+    if install_config["agent-created"] == str(agent_process.create_time()):
+        # The agent has not been restarted, so restart it now.  This will cause
+        # the task to fail (but sys.exit(1) to make sure).  The task will be
+        # relaunched, and next time will miss this branch and succeed.
+        _log.warning("Restarting agent process: %s", agent_process)
+        if public_slave:
+            restart_service("dcos-mesos-slave-public", agent_process)
+        else:
+            restart_service("dcos-mesos-slave", agent_process)
+        sys.exit(1)
+
+    _log.debug("Agent was restarted and is stable since config was updated")
+    return
+
+
 def cmd_install_docker_cluster_store():
     """
     Install Docker configuration for Docker multi-host networking.  A successful
@@ -656,6 +750,9 @@ if __name__ == "__main__":
         cmd_install_docker_cluster_store()
     elif action == "ip":
         cmd_get_agent_ip()
+    elif action == "cni":
+        public_slave = "--public" in sys.argv
+        cmd_install_cni(public_slave=public_slave)
     else:
         print "Unexpected action: %s" % action
         sys.exit(1)
