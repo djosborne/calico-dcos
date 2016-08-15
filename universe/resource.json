@@ -7,7 +7,7 @@
   "assets": {
     "container": {
       "docker": {
-        "calico-dcos": "djosborne/calico-dcos:v0.2.0",
+        "calico-dcos": "calico/calico-dcos:v0.2.0",
         "calico-node": "calico/node:v0.20.0",
         "calico-libnetwork": "calico/node-libnetwork:v0.8.0"
       }
