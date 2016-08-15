@@ -325,13 +325,6 @@ class TaskRunCalicoNode(Task):
                              "--detach=false" % (cmd_ip, config.node_img)
         task.command.user = "root"
 
-        # Add a URI for downloading the calicoctl binary
-        uri = task.command.uris.add()
-        uri.value = config.calicoctl_url
-        uri.executable = True 
-        uri.cache = True
-        uri.extract = False
-
         # Download the installer binary
         uri = task.command.uris.add()
         uri.value = config.installer_url
