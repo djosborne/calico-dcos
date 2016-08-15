@@ -321,8 +321,7 @@ class TaskRunCalicoNode(Task):
                              "-v /lib/modules:/lib/modules " \
                              "-e IP=%s " \
                              "-e HOSTNAME=$(hostname) " \
-                             "%s " \
-                             "--detach=false" % (cmd_ip, config.node_img)
+                             "%s " % (cmd_ip, config.node_img)
         task.command.user = "root"
 
         # Download the installer binary
