@@ -4,7 +4,7 @@
     "type": "DOCKER",
     "network": "HOST",
     "docker": {
-      "image": {{#debug.override-framework-image?}}"{{debug.override-framework-image}}"{{/debug.override-framework-image?}}{{^debug.override-framework-image?}}"{{resource.assets.container.docker.calico-dcos}}"{{/debug.override-framework-image?}},
+      "image": {{#debug.override-framework-image}}"{{debug.override-framework-image}}"{{/debug.override-framework-image}}{{^debug.override-framework-image}}"{{resource.assets.container.docker.calico-dcos}}"{{/debug.override-framework-image}},
       "network": "HOST",
       "forcePullImage": true
     }
