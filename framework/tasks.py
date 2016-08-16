@@ -287,6 +287,14 @@ class TaskInstallCalicoCNI(Task):
         uri.cache = True
         uri.extract = False
 
+        # Download Calico CNI IPAM Binary
+        uri = task.command.uris.add()
+        # TODO: Paramaterize calico-ipam url
+        uri.value = "https://github.com/projectcalico/calico-cni/releases/download/v1.3.1/calico-ipam"
+        uri.executable = True
+        uri.cache = True
+        uri.extract = False
+
         # Download the installer binary
         uri = task.command.uris.add()
         uri.value = config.installer_url

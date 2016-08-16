@@ -566,8 +566,8 @@ def cmd_install_cni(public_slave=False):
         store_config(CNI_INSTALL_CONFIG, install_config)
 
         # Install Calico-IPAM
-        # move_file_if_missing("./calico-ipam",
-        #                      "/opt/mesosphere/active/cni")
+        move_file_if_missing("./calico-ipam",
+                             "/opt/mesosphere/active/cni/calico-ipam")
 
     if not install_config.get("cni-conf-installed"):
         # Write CNI configuration
@@ -575,7 +575,7 @@ def cmd_install_cni(public_slave=False):
             "name": "calico",
             "type": "calico",
             "ipam": {
-                "type": "calico"
+                "type": "calico-ipam"
             }
         }
         store_config("/opt/mesosphere/etc/dcos/network/cni/calico.cni", cni_conf)
