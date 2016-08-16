@@ -329,6 +329,8 @@ class TaskRunCalicoNode(Task):
                              "-v /lib/modules:/lib/modules " \
                              "-e IP=%s " \
                              "-e HOSTNAME=$(hostname) " \
+                             "-e ETCD_AUTHORITY=localhost:2379 " \
+                             "-e ETCD_SCHEME=http " \
                              "%s " % (cmd_ip, config.node_img)
         task.command.user = "root"
 
