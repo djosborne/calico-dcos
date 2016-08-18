@@ -1,0 +1,20 @@
+{
+  "etcd": {
+    "cpu-limit": 0.1,
+    "cluster-size": 1,
+    "reseed-timeout": 240,
+    "auto-reseed": true,
+    "logging-verbosity": 1,
+    "mem-limit": 64,
+    "dns-suffix": ".marathon.mesos",
+    "disk-limit": 4096,
+    "framework-name": "etcd",
+    "zk": "zk://master.mesos:2181/etcd",
+    "admin-port": "$PORT0",
+    "cpus": 0.1,
+    "mem": 64
+  },
+  "mesos": {
+    "master": "zk://master.mesos:2181/mesos"
+  }
+}

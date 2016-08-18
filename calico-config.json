@@ -1,0 +1,30 @@
+{
+  "debug": {
+    "override-installer-url": "http://192.168.65.1:81/installer",
+    "override-framework-image": "djosborne/calico-dcos:latest",
+    "override-node-image": "calico/node:latest"
+  },
+  "etcd": {
+    "etcd-discovery-url": "etcd.mesos"
+  },
+  "mesos": {
+    "master": "zk://master.mesos:2181/mesos"
+  },
+  "calico": {
+    "mem-limit-install": 64,
+    "mem-limit-node": 64,
+    "mem-limit-etcd-proxy": 64,
+    "cpu-limit-install": 0.1,
+    "cpu-limit-framework": 0.1,
+    "status-dns": "calico.marathon.mesos",
+    "mem-limit-framework": 64,
+    "cpu-limit-node": 0.1,
+    "mem-limit-libnetwork": 64,
+    "cpu-limit-etcd-proxy": 0.1,
+    "cpu-limit-libnetwork": 0.1,
+    "framework-name": "calico",
+    "zk": "zk://master.mesos:2181/calico",
+    "allow-docker-update": true,
+    "max-concurrent-restarts": 1
+  }
+}
