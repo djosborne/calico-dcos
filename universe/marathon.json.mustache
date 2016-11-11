@@ -71,11 +71,6 @@
     {{^Run Calico-Node.override-node-image}}
       "{{resource.assets.container.docker.calico-node}}",
     {{/Run Calico-Node.override-node-image}}
-
-    "CALICO_ENABLE_RUN_LIBNETWORK": "{{Run Calico-Libnetwork.enable}}",
-    "CALICO_CPU_LIMIT_LIBNETWORK": "{{Run Calico-Libnetwork.cpu-limit}}",
-    "CALICO_MEM_LIMIT_LIBNETWORK": "{{Run Calico-Libnetwork.mem-limit}}",
-    "CALICO_LIBNETWORK_IMG": "{{resource.assets.container.docker.calico-libnetwork}}"
   },
   "labels": {
     "DCOS_PACKAGE_FRAMEWORK_NAME": "{{Framework Settings.framework-name}}"

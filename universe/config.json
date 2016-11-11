@@ -61,7 +61,7 @@
       "type": "object"
     },
     "Etcd Settings": {
-      "description": "Configure etcd settings used by calico/node, calico/libnetwork-plugin, and calico-CNI. Below presents the option of whether to run etcd on each agent in proxy mode, forwarding requests made to localhost:2379 to the etcd clutser avaiable via the etcd-discovery-url presented by the Universe etcd package. Users who prefer to run etcd themselves on an agent can disable etcd proxy, and modify etcd-endpoints to point at their own etcd server directly.\n\nWARNING: The docker cluster-store configuration by default will use etcd-proxy. Ensure if you have disabled etcd-proxy, that you configure docker to use a different datastore as well.",
+      "description": "Configure etcd settings used by calico/node and calico-CNI. Below presents the option of whether to run etcd on each agent in proxy mode, forwarding requests made to localhost:2379 to the etcd clutser avaiable via the etcd-discovery-url presented by the Universe etcd package. Users who prefer to run etcd themselves on an agent can disable etcd proxy, and modify etcd-endpoints to point at their own etcd server directly.\n\nWARNING: The docker cluster-store configuration by default will use etcd-proxy. Ensure if you have disabled etcd-proxy, that you configure docker to use a different datastore as well.",
       "type": "object",
       "properties": {
         "run-proxy": {
@@ -203,34 +203,6 @@
         "cpu-limit",
         "mem-limit"
       ]
-    },
-    "Run Calico-Libnetwork": {
-      "description": "Run calico/libnetwork on all agents. Required to use calico networking for Docker containers.",
-      "type": "object",
-      "properties": {
-        "enable": {
-          "type": "boolean",
-          "description": "Enable running calico/libnetwork on each agent.",
-          "default": true
-        },
-        "cpu-limit": {
-          "default": 0.2,
-          "description": "The CPU shares for each Calico Docker Network driver instance.",
-          "minimum": 0.01,
-          "type": "number"
-        },
-        "mem-limit": {
-          "default": 256,
-          "description": "Memory limit (MB) for each Calico Docker Network driver instance.",
-          "minimum": 32,
-          "type": "integer"
-        }
-      },
-      "required": [
-        "enable",
-        "cpu-limit",
-        "mem-limit"
-      ]
     }
   },
   "required": [
@@ -238,8 +210,7 @@
     "Etcd Settings",
     "Configure Docker Cluster-Store",
     "Install CNI",
-    "Run Calico-Node",
-    "Run Calico-Libnetwork"
+    "Run Calico-Node"
   ],
   "type": "object"
 }

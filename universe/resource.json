@@ -8,8 +8,7 @@
     "container": {
       "docker": {
         "calico-dcos": "calico/calico-dcos:latest",
-        "calico-node": "calico/node:latest",
-        "calico-libnetwork": "calico/node-libnetwork:latest"
+        "calico-node": "calico/node:latest"
       }
     },
     "uris": {
